@@ -25,11 +25,10 @@ except ImportError:
 class Node(object):
     """Node definition."""
 
-    def __init__(self, tag="", attrs=None, starttag_text="",
+    def __init__(self, tag="", starttag_text="",
                  parent=None, start=None, end=None):
         self.tag = tag          # tag name
         self.starttag_text = starttag_text # raw starttag text
-        self.attrs = attrs      # a dictionary {attr: value, ..}
         self.start = start      # a tuple (row, col)
         self.end = end          # a tuple (row, col)
         self.parent = parent    # a Node or None (if root)
@@ -43,17 +42,6 @@ class Node(object):
         return "<{0} start={1} end={2}>".format(
             self.tag, self.start, self.end)
 
-    def id(self):
-        """Returns the id attribute."""
-        return self.attrs.get("id", [])
-
-    def classes(self):
-        """Returns the class attribute."""
-        classes = self.attrs.get("class")
-        if classes:
-            return classes.split()
-        else:
-            return []
 
 class Parser(HTMLParser.HTMLParser):
     """Custom HTML parser."""
@@ -85,9 +73,8 @@ class Parser(HTMLParser.HTMLParser):
             self.last_known_error = dict(msg=e.msg, pos=(e.lineno, e.offset))
             self.tree = Node(tag="root")
             self.success = False
-        else:
-            self.close()
-        self.reset()
+        finally:
+            self.reset()
 
     def handle_startendtag(self, tag, attrs):
         """Handles empty tags."""
@@ -108,8 +95,8 @@ class Parser(HTMLParser.HTMLParser):
             return
 
         if self.stack:
-            node = Node(tag, dict(attrs), self.get_starttag_text(),
-                        self.stack[-1], self.getpos())
+            node = Node(tag, self.get_starttag_text(), self.stack[-1],
+                        self.getpos())
             self.stack[-1].children.append(node)
             self.stack.append(node)
 
@@ -149,6 +136,14 @@ class Parser(HTMLParser.HTMLParser):
     def _closest_node(self, tree, depth, closest_node, closest_depth, pos):
         """Finds the closest element that encloses our current cursor
         position."""
+        if not tree.start or not tree.end:
+            msg = "malformed tag found"
+            if not tree.start:
+                self.last_known_error = dict(msg=msg, pos=tree.end)
+            if not tree.end:
+                self.last_known_error = dict(msg=msg, pos=tree.start)
+            return (None, -1)
+
         row, col = pos
         startrow, startcol = tree.start[0], tree.start[1]
         endrow = tree.end[0]
@@ -170,31 +165,48 @@ class Parser(HTMLParser.HTMLParser):
         else:
             cond = False
 
-        # if cond is True the element encloses our position and we temporarily
-        # assume that this is the closest element relative to our position
+        # if cond is True the current element (tree) eclose our position. Now
+        # we assume this is the closest node that enclose our position.
         if cond:
+
             closest_node = tree
             closest_depth = depth
 
-        # check recursively for the closest element
-        for c in tree.children:
-            n, d, = self._closest_node(
-                        c, depth + 1, closest_node, closest_depth, pos)
-
-            if d > closest_depth:
-                closest_node = n
-                closest_depth = d
-
-            if depth < closest_depth:
-                # we have already found the closest node and we are going up
-                # the tree structure (depth < closest_depth). There is no
-                # need to continue the search
+            if not tree.children:
                 return closest_node, closest_depth
 
-        return closest_node, closest_depth
+            # if the current position is closest to the end of the current
+            # enclosing tag, start iterating its children from the last element,
+            # and vice-versa. This little piece of code just aims to improve
+            # performances, nothing else.
+            if row - tree.start[0] > tree.end[0] - row:
+                rev = True
+            else:
+                rev = False
+
+            for child in (reversed(tree.children) if rev else tree.children):
+                n, d = self._closest_node(
+                    child, depth + 1, closest_node, closest_depth, pos)
+
+                if d > closest_depth:
+                    # a child of tree node is closest to the current position.
+                    closest_node = n
+                    closest_depth = d
+
+                if depth < closest_depth:
+                    # we have already found the closest node and we are going up
+                    # the tree structure (depth < closest_depth). There is no
+                    # need to continue the search
+                    return closest_node, closest_depth
+
+            return closest_node, closest_depth
+
+        else:
+            # untouched
+            return closest_node, closest_depth
 
     def print_dom_tree(self, indent=2):
-        """Print the parsed DOM tree."""
+        """Prints the parsed DOM tree."""
 
         def _print_tree(tree, depth, indent):
             """Internal function for printing the HTML tree."""
@@ -219,11 +231,10 @@ class Parser(HTMLParser.HTMLParser):
         else:
             return []
 
-    def whats_wrong(self):
-        """If something went wrong during the last parse,
-        tell the user about it."""
+    def get_error(self):
+        """Returns the last known error."""
         if self.last_known_error is not None:
-            self.misc.echom("Error found at {pos}, type: {msg}".format(
-                **self.last_known_error))
+            return "Error found at {pos}, type: {msg}".format(
+                        **self.last_known_error)
         else:
-            self.misc.echom("All should be fine!")
+            return "All should be fine!"

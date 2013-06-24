@@ -1,6 +1,6 @@
 # breeze.vim
 
-**v1.0**
+**v1.0.1**
 
 ###Features
 * HTML navigation inspired by vim-easymotion.
@@ -11,7 +11,7 @@
 
 ### Requirements
 * Vim compiled with python 2.6+
-* Unix, Mac OSX (untested on Windows)
+* Unix, Mac OS X (untested on Windows)
 
 
 ### Installation
@@ -97,6 +97,10 @@ If the command is called within an element, this command moves the cursor to
 its opening tag. Remember that you can easily jump back to previous positions
 with `CTRL+O`.
 
+**Limitations:** At the moment current element highlighting is still inefficient for large files
+and your movements may become quite slow. So you may be better off disabling the feature for such files
+until I'll come up with a fast solution.
+
 ### Settings
 
 **g:breeze_highlight_tag**: set this setting to 0 to disable automatic highlighting
@@ -139,6 +143,12 @@ Moves the cursor to the next sibling node.
 
 **BreezePrevSibling**     
 Moves the cursor to the previous sibling node.
+
+**BreezeFirstSibling**     
+Moves the cursor to the first sibling node.
+
+**BreezeLastSibling**     
+Moves the cursor to the last sibling node.
 
 **BreezeFirstChild**   
 Moves the cursor to the first child node.

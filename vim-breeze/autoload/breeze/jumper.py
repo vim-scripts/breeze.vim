@@ -47,7 +47,7 @@ class Jumper(object):
 
         vim.command("setlocal modifiable")
         vim.command("setlocal noreadonly")
-        vim.command("syntax off")
+        #vim.command("syntax off")
 
         top, bot = self.misc.window_bundaries()
         ps = [node.start for node in self.plug.parser.all_nodes()
@@ -105,7 +105,6 @@ class Jumper(object):
 
     def clear_jump_marks(self, table):
         """Clear jump marks."""
-        self.misc.clear_highlighting()
         vim.command("try|undojoin|catch|endtry")
         # restore characters
         buf = vim.current.buffer
@@ -114,7 +113,7 @@ class Jumper(object):
             row, col = pos[0]-1, pos[1]+1
             self.misc.subst_char(buf, old, row, col)
 
-        vim.command("syntax on")
+        #vim.command("syntax on")
         vim.command("setlocal nomodified")
         vim.command("redraw")
 
@@ -131,13 +130,12 @@ class Jumper(object):
             if choice is None:
                 break
 
+        self.misc.clear_hl()
         self.clear_jump_marks(table)
 
         if choice:
             row, col = table[choice][0]
-            if self.settings.get("jump_to_angle_bracket", bool):
+            if not self.settings.get("jump_to_angle_bracket", bool):
                 col += 1
-            else:
-                col += 2
             self.misc.cursor((row, col))
 

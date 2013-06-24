@@ -25,12 +25,29 @@ class Input:
         self.RETURN = self.ESC = self.TAB = None
         self.MOUSE = self.CTRL = self.INTERRUPT = None
         self.CHAR = None
+        vim.command("let g:_pse_launcher_char = ''")
+        vim.command("let g:_pse_launcher_interrupt = 0")
 
     def get(self):
         """Reads the key pressed by the user in the command line."""
         self.reset()
 
-        nr_char = vim.eval("getchar()")
+        vim.command("""
+            try |
+             let g:_pse_launcher_char = getchar() |
+            catch |
+             let g:_pse_launcher_interrupt = 1 |
+            endtry
+        """)
+
+        if vim.eval('g:_pse_launcher_interrupt') == '1': # Ctrl + c
+            self.CTRL = True
+            self.CHAR = 'c'
+            self.INTERRUPT = True
+            return
+        else:
+            nr_char = vim.eval('g:_pse_launcher_char')
+
         nr = int(vim.eval("str2nr('{0}')".format(nr_char)))
 
         if nr != 0:
@@ -44,8 +61,6 @@ class Input:
             elif 1 <= nr <= 26:
                 self.CTRL = True
                 self.CHAR = vim.eval("nr2char({0})".format(nr + 96))
-                if self.CHAR == 'c':
-                    self.INTERRUPT = True
             else:
                 self.CHAR = vim.eval("nr2char({0})".format(nr))
 

@@ -4,22 +4,19 @@
 " Mantainer: Giacomo Comitti (https://github.com/gcmt)
 " Url: https://github.com/gcmt/breeze.vim
 " License: MIT
-" Version: 1.0
-" Last Changed: 5/1/2013
+" Version: 1.0.1
+" Last Changed: 6/24/2013
 " ============================================================================
 
-" Init  {{{
+" Init {{{
 
 fu! breeze#init()
     let py_module = fnameescape(globpath(&runtimepath, 'autoload/breeze.py'))
     exe 'pyfile ' . py_module
-echo "initialized 1"
     python breeze_plugin = Breeze()
-echo "initialized 2"
 endfu
 
 call breeze#init()
-echo "initialized 3"
 let g:breeze_initialized = 1
 
 " }}}
@@ -64,6 +61,14 @@ fu! breeze#PrevSibling()
     py breeze_plugin.goto_prev_sibling()
 endfu
 
+fu! breeze#FirstSibling()
+    py breeze_plugin.goto_first_sibling()
+endfu
+
+fu! breeze#LastSibling()
+    py breeze_plugin.goto_last_sibling()
+endfu
+
 fu! breeze#FirstChild()
     py breeze_plugin.goto_first_child()
 endfu
@@ -98,18 +103,18 @@ augroup breeze_plugin
 
     au!
     au Colorscheme *.html,*.htm,*.xhtml,*.xml py breeze_plugin.setup_colors()
-    au BufEnter,BufLeave,CursorMoved *.html,*.htm,*.xhtml,*.xml py breeze.utils.misc.clear_highlighting()
+    au CursorMoved,CursorMovedI,BufLeave,BufWinLeave,WinLeave *.* py breeze_plugin.clear_element_hl()
 
-    " update the cache
+    " FIX: at this events the plugin should rebuild the cache,
+    " not just tell that the cache need to be updated
     au BufReadPost,BufWritePost,BufEnter *.html,*.htm,*.xhtml,*.xml py breeze_plugin.refresh_cache=True
     au CursorHold,CursorHoldI *.html,*.htm,*.xhtml,*.xml py breeze_plugin.refresh_cache=True
     au InsertEnter,InsertLeave *.html,*.htm,*.xhtml,*.xml py breeze_plugin.refresh_cache=True
     au BufWritePost *.html,*.htm,*.xhtml,*.xml py breeze_plugin.refresh_cache=True
 
     if g:breeze_hl_element
-        " the user want current element always highlighted. The CursorMoved'
-        " event is somewhat costly but here the cache comes into play
         au CursorMoved *.html,*.htm,*.xhtml,*.xml py breeze_plugin.highlight_curr_element()
+        au InsertEnter *.* py breeze_plugin.clear_element_hl()
     endif
 
 augroup END

@@ -4,14 +4,13 @@
 " Mantainer: Giacomo Comitti (https://github.com/gcmt)
 " Url: https://github.com/gcmt/breeze.vim
 " License: MIT
-" Version: 1.0
-" Last Changed: 5/1/2013
+" Version: 1.0.1
+" Last Changed: 6/24/2013
 " ============================================================================
 
 " Init {{{
 
-if exists("g:breeze_loaded") || &cp || exists("g:breeze_disable") ||
-    \ !has('python')
+if exists("g:breeze_loaded") || &cp || exists("g:breeze_disable") || !has('python')
     finish
 endif
 let g:breeze_loaded = 1
@@ -61,6 +60,8 @@ command! BreezeHlElementBlock call breeze#HighlightElementBlock()
 " dom navigation
 command! BreezeNextSibling call breeze#NextSibling()
 command! BreezePrevSibling call breeze#PrevSibling()
+command! BreezeFirstSibling call breeze#FirstSibling()
+command! BreezeLastSibling call breeze#LastSibling()
 command! BreezeFirstChild call breeze#FirstChild()
 command! BreezeLastChild call breeze#LastChild()
 command! BreezeParent call breeze#Parent()
@@ -75,8 +76,7 @@ command! BreezeWhatsWrong call breeze#WhatsWrong()
 
 augroup breeze_init
     au!
-    au BufWinEnter *.html,*.htm,*.xhtml,*.xml
-        \ if !exists("g:breeze_initialized") | call breeze#init() | endif
+    au BufWinEnter *.html,*.htm,*.xhtml,*.xml if !exists("g:breeze_initialized") | call breeze#init() | endif
 augroup END
 
 " }}}

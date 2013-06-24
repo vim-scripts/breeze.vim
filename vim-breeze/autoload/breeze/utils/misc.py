@@ -22,17 +22,12 @@ def echov(msg):
         echom(msg)
 
 
-def cursor(target=None, kj=False):
-    """Moves the cursor.
-
-    If the kj parameter is set to True, then the command behaves as following:
-    :help keepjumps -> Moving around in {command} does not change the '', '.
-                       and '^ marks, the jumplist or the changelist...
-    """
+def cursor(target=None):
+    """Moves the cursor or returs the current cursor position."""
     if not target:
         return vim.current.window.cursor
-    vim.command("{0}call cursor({1}, {2})".format(
-        "keepjumps " if kj else "", target[0], target[1]))
+    else:
+        vim.current.window.cursor = target
 
 
 def window_bundaries():
@@ -58,8 +53,25 @@ def window_bundaries():
 
 def highlight(group, patt, priority=10):
     """Wraps the matchadd() vim function."""
-    vim.eval("matchadd('{0}', '{1}', {2})".format(
-        group, patt, priority))
+    return vim.eval("matchadd('{0}', '{1}', {2})".format(
+                    group, patt, priority))
+
+
+def clear_hl_by_ids(ids):
+    """Clears Breeze highlightings with id in 'ids'."""
+    for id in ids:
+        vim.command("call matchdelete({0})".format(id))
+
+
+def clear_hl():
+    """Clears Breeze highlightings.
+
+    For performance reasons the group BreezeHl handled separately
+    with the clear_hl_by_ids function.
+    """
+    for match in vim.eval("getmatches()"):
+        if match['group'] in ('BreezeJumpMark', 'BreezeShade'):
+            vim.command("call matchdelete({0})".format(match['id']))
 
 
 def subst_char(buffer, v, row, col):
@@ -79,10 +91,5 @@ def subst_char(buffer, v, row, col):
     return old
 
 
-def clear_highlighting():
-    """Clears Breeze highlightings."""
-    for match in vim.eval("getmatches()"):
-        if match['group'] in ('BreezeJumpMark', 'BreezeShade', 'BreezeHl'):
-            vim.command("call matchdelete({0})".format(match['id']))
 
 

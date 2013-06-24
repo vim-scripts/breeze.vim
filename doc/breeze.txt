@@ -1,6 +1,6 @@
 *breeze.txt* *breeze*
 
-                                breeze v1.0
+                               breeze v1.0.1
                                      ~ 
                               Reference Manual
 
@@ -35,6 +35,7 @@ Features:
 Requirements
 
     * Vim compiled with python 2.6+
+    * Unix, Mac OS X (untested on Windows)
 
 
 ------------------------------------------------------------------------------
@@ -184,6 +185,10 @@ Commands:
 *BreezeNextSibling*: Moves the cursor to the next sibling node.
 
 *BreezePrevSibling*: Moves the cursor to the previous sibling node.
+
+*BreezeFirstSibling*: Moves the cursor to the first sibling node.
+
+*BreezeLastSibling*: Moves the cursor to the last sibling node.
 
 *BreezeFirstChild*: Moves the cursor to the first child node.
 
