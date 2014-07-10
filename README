@@ -3,15 +3,6 @@ This is a mirror of http://www.vim.org/scripts/script.php?script_id=4569
 
 Breeze is a plugin that aims to help developers dealing with HTML files.
 
-Features:
-
-    - HTML navigation inspired by vim-easymotion.
-    - Tag matching.
-    - Current element highlighting.
-    - Low level DOM navigation.
-
-For a nice-to-read documentation and animated GIFs go to
-https://github.com/gcmt/breeze.vim
 
 
 

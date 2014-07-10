@@ -1,52 +1,64 @@
 " ============================================================================
 " File: plugin/breeze.vim
-" Description: DOM navigation
-" Mantainer: Giacomo Comitti (https://github.com/gcmt)
+" Description: HTML utils
+" Mantainer: Giacomo Comitti - https://github.com/gcmt
 " Url: https://github.com/gcmt/breeze.vim
 " License: MIT
-" Version: 1.0.1
-" Last Changed: 6/24/2013
+" Last Changed: 8 Sep 2013
 " ============================================================================
 
-" Init {{{
 
-if exists("g:breeze_loaded") || &cp || exists("g:breeze_disable") || !has('python')
+" Init
+" ----------------------------------------------------------------------------
+
+if exists("g:breeze_loaded") || &cp || !has('python') || exists("g:breeze_disable")
     finish
 endif
 let g:breeze_loaded = 1
 
-" }}}
 
-" Settings {{{
+" Settings
+" ----------------------------------------------------------------------------
 
-let g:breeze_hl_element =
-    \ get(g:, 'breeze_hl_element', 1)
+" basic
+
+let g:breeze_active_filetypes =
+    \ "*.html,*.htm,*.xhtml,*.xml," . get(g:, 'breeze_active_filetypes', '')
+    " deprecated
+    \ . get(g:, 'breeze_highlight_filename_patterns', '')
+
+let g:breeze_highlight_curr_element =
+    \ get(g:, 'breeze_highlight_curr_element', 1)
+" deprecated
+let g:breeze_highlight_curr_element =
+    \ get(g:, 'breeze_hl_element', g:breeze_highlight_curr_element)
 
 let g:breeze_jump_to_angle_bracket =
     \ get(g:, 'breeze_jump_to_angle_bracket', 0)
 
+" appearance
 
 let g:breeze_hl_color =
     \ get(g:, 'breeze_hl_color', 'MatchParen')
-let g:breeze_hl_color_darkbg =
-    \ get(g:, 'breeze_hl_color_darkbg', '')
 
+let g:breeze_hl_color_darkbg =
+    \ get(g:, 'breeze_hl_color_darkbg', g:breeze_hl_color)
 
 let g:breeze_shade_color =
-    \ get(g:, 'breeze_shade_color', 'gui=NONE guifg=#777777 cterm=NONE ctermfg=242')
+    \ get(g:, 'breeze_shade_color', 'Comment')
+
 let g:breeze_shade_color_darkbg =
-    \ get(g:, 'breeze_shade_color_darkbg', '')
+    \ get(g:, 'breeze_shade_color_darkbg', g:breeze_shade_color)
 
 let g:breeze_jumpmark_color =
-    \get(g:, 'breeze_jumpmark_color', 'gui=bold guifg=#ff6155 cterm=bold ctermfg=203')
+    \ get(g:, 'breeze_jumpmark_color', 'WarningMsg')
+
 let g:breeze_jumpmark_color_darkbg =
-    \ get(g:, 'breeze_jumpmark_color_darkbg', '')
+    \ get(g:, 'breeze_jumpmark_color_darkbg', g:breeze_jumpmark_color)
 
-let g:breeze_verbosity = get(g:, "breeze_verbosity", 0)
 
-" }}}
-
-" Commands {{{
+" Commands
+" ----------------------------------------------------------------------------
 
 " tag jumping
 command! BreezeJumpF call breeze#JumpForward()
@@ -55,7 +67,6 @@ command! BreezeJumpB call breeze#JumpBackward()
 " tag matching / highlighting
 command! BreezeMatchTag call breeze#MatchTag()
 command! BreezeHlElement call breeze#HighlightElement()
-command! BreezeHlElementBlock call breeze#HighlightElementBlock()
 
 " dom navigation
 command! BreezeNextSibling call breeze#NextSibling()
@@ -70,13 +81,11 @@ command! BreezeParent call breeze#Parent()
 command! BreezePrintDom call breeze#PrintDom()
 command! BreezeWhatsWrong call breeze#WhatsWrong()
 
-" }}}
 
-" autocommands {{{
+" Autocommands
+" ----------------------------------------------------------------------------
 
 augroup breeze_init
     au!
-    au BufWinEnter *.html,*.htm,*.xhtml,*.xml if !exists("g:breeze_initialized") | call breeze#init() | endif
+    exe 'au BufWinEnter '.g:breeze_active_filetypes.' if !exists("g:breeze_initialized") | call breeze#init() | endif'
 augroup END
-
-" }}}

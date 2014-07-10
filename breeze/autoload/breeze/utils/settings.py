@@ -17,11 +17,11 @@ def set(name, value):
     if isinstance(value, basestring):
         val = "'{0}'".format(value)
     elif isinstance(value, bool):
-        val = "{0}".format(1 if value else 0)
+        val = 1 if value else 0
     else:
         val = value
 
-    vim.command("let {0} = {1}".format(prefix + name, val))
+    vim.command("let {0} = {0}".format(prefix + name, val))
 
 
 def get(name, type=None):
